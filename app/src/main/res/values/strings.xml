@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SaveFall</string>
+    <string name="Hello">Hello</string>
+    <string name="on_x">Hello</string>
+    <string name="on_y">Hello</string>
+    <string name="on_z">Hello</string>
+    <string name="fall">Hello</string>
+
+</resources>
