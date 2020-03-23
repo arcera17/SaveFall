@@ -15,13 +15,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView xText, yText, zText, rootText, timeText1, timeText2, minValueText, maxValueText;
-    double rootSquare, maxValue = 10, minValue = 9;
+    TextView xText, yText, zText, rootText;
+    double rootSquare;
 
     SensorManager sensorManager;
     Sensor sensor;
     boolean isPresent = false;
-    int Falls = 0;
+    String rootTextString = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,51 +68,34 @@ public class MainActivity extends AppCompatActivity {
             yText = (TextView) findViewById(R.id.y);
             zText = (TextView) findViewById(R.id.z);
             rootText = (TextView) findViewById(R.id.rootSquare);
-            timeText1 = (TextView) findViewById(R.id.time1);
-
-            maxValueText = (TextView) findViewById(R.id.maxValue);
-            minValueText = (TextView) findViewById(R.id.minValue);
 
             rootSquare = 0;
 
             if ( x >= 0 ) {
-                xText.setText("Pe x: " + x);
+                xText.setText("x: " + x);
                 rootSquare += Math.pow( x,2);
             }else{
-                xText.setText("x ");
+                xText.setText("x -");
             }
 
             if ( y >= 0 ) {
-                yText.setText("Pe y: " + y);
+                yText.setText("y: " + y);
                 rootSquare += Math.pow( y,2);
             }else{
-                yText.setText("y ");
+                yText.setText("y -");
             }
 
             if ( z >= 0 ) {
-                zText.setText("Pe z: " + z);
+                zText.setText("z: " + z);
                 rootSquare += Math.pow( z,2);
             }else{
-                zText.setText("z");
+                zText.setText("z -");
             }
 
             rootSquare = Math.sqrt(rootSquare);
 
-            if(maxValue <= rootSquare){
-                maxValue = rootSquare;
-            }
-            if(minValue >= rootSquare){
-                minValue = rootSquare;
-            }
-
-            maxValueText.setText("max value : " + maxValue);
-            minValueText.setText("min value : " + minValue);
-
-            rootText.setText("root square : " + rootSquare);
-
-            String currentDateTimeString = java.text.DateFormat.getDateTimeInstance().format(new Date());
-            timeText1.setText("start: " + currentDateTimeString);
-
+            rootTextString = "Root square :" + rootSquare;
+            rootText.setText(rootTextString);
         }
 
         @Override
