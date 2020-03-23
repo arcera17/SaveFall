@@ -10,12 +10,19 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 public class MainActivity extends AppCompatActivity {
 
-    TextView xText, yText, zText, rootText;
+    TextView xText, yText, zText, rootText, mTextViewResult;
     double rootSquare;
 
     SensorManager sensorManager;
@@ -23,10 +30,14 @@ public class MainActivity extends AppCompatActivity {
     boolean isPresent = false;
     String rootTextString = "";
 
+    OkHttpClient client = new OkHttpClient();
+    String url = "http://167.71.59.142:8080?x=13";
+//    String url = "https://reqres.in/api/users?page=2";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        sensorManager =(SensorManager)getSystemService(SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
 
         if(sensors.size() > 0){
@@ -39,6 +50,34 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String myResponse = response.body().string();
+
+                if(response.isSuccessful()) {
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTextViewResult.setText(myResponse);
+                        }
+                    });
+                }
+                else{
+                    mTextViewResult.setText("Something wrong");
+                }
+            }
+        });
     }
 
     @Override
@@ -68,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
             yText = (TextView) findViewById(R.id.y);
             zText = (TextView) findViewById(R.id.z);
             rootText = (TextView) findViewById(R.id.rootSquare);
+            mTextViewResult = (TextView) findViewById(R.id.text_view_result);
 
             rootSquare = 0;
 
