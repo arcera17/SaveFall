@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">SaveFall</string>
     <string name="Hello">Hello</string>
-    <string name="on_x">Hello</string>
-    <string name="on_y">Hello</string>
-    <string name="on_z">Hello</string>
+    <string name="on_x">x: </string>
+    <string name="on_y">y: </string>
+    <string name="on_z">z: </string>
+    <string name="http_text">Http request</string>
 
 </resources>
