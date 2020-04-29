@@ -64,7 +64,7 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home_page);
 
         // Views
         mTextViewResult = (TextView) findViewById(R.id.response_http);
@@ -184,7 +184,7 @@ public class HomePage extends AppCompatActivity {
                     if(response.isSuccessful()){
                         final String myResponse = response.body().toString();
 
-                        MainActivity.this.runOnUiThread(new Runnable() {
+                        HomePage.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 testOne.setText("Response: "+myResponse);
@@ -203,7 +203,7 @@ public class HomePage extends AppCompatActivity {
 
 
     // Add params to url
-    private String urlParams(String url , HashMap<String, Float> params ) {
+    public static String urlParams(String url , HashMap<String, Float> params ) {
         Character and = new Character('&');
         Character lastChar = new Character(url.charAt(url.length()-1));
 
