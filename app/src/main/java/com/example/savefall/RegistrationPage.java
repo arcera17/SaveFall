@@ -1,12 +1,17 @@
 package com.example.savefall;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,8 +27,7 @@ import okhttp3.Response;
 public class RegistrationPage extends AppCompatActivity {
 
     private Button registerBtn;
-    private EditText emailInput,  passwordInput;
-    private TextView testEmail, testPassword, requestTest, responseTest;
+    private EditText loginInput,  passwordInput;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,64 +45,82 @@ public class RegistrationPage extends AppCompatActivity {
         });
     }
 
-    // Register new user
+    // register new user
     private void register(){
         // for Http parameters
-        String url = "http://167.71.59.142/api/register.php";
+        String url = HomePage.appURL +  "/api/register.php";
         HashMap<String, String> params = new HashMap<String, String>();
 
-        
-        emailInput = (EditText) findViewById(R.id.emailInput);
+        // data from activity
+        loginInput = (EditText) findViewById(R.id.loginInput);
         passwordInput = (EditText) findViewById(R.id.passwordInput);
-        testEmail = (TextView) findViewById(R.id.testEmail);
-        testPassword = (TextView) findViewById(R.id.testPassword);
-        requestTest = (TextView) findViewById(R.id.requestTest);
-        responseTest = (TextView) findViewById(R.id.responseTest);
 
-        String email = emailInput.getText().toString();
+        // get entered data
+        String login = loginInput.getText().toString();
         String password = passwordInput.getText().toString();
 
-        testEmail.setText(email);
-        testPassword.setText((password));
 
-        // Paramds for url
-        params.put("email", email);
+        // paramds for url
+        params.put("login", login);
         params.put("password", password);
 
-        // Add params to url
+        // add params to url
         url += urlParams(url, params);
 
-        // Create client for Http request and to request URL
+        // create client for Http request and to request URL
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url)
                 .build();
 
-        requestTest.setText(request.toString());
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                responseTest.setText("Http: bad" + e.getMessage());
+                AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationPage.this);
+                builder.setMessage("Http: bad" + e.getMessage())
+                        .setNegativeButton("Retry", null)
+                        .create()
+                        .show();
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, final Response response) throws IOException {
                 if(response.isSuccessful()){
-                    final String myResponse = response.body().toString();
+                    final String myResponse = response.body().string();
 
                     RegistrationPage.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            responseTest.setText("Response: "+myResponse);
+                            try {
+                                JSONObject jsonResponse = new JSONObject(myResponse);
+                                boolean success = jsonResponse.getBoolean("success");
+
+                                // if is success registration
+                                if(success){
+                                    Intent loginPage = new Intent( RegistrationPage.this, LoginPage.class);
+                                    startActivity(loginPage);
+                                }
+                                else{
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(RegistrationPage.this);
+                                    builder.setMessage("Register failed, Please try again!")
+                                            .setNegativeButton("Retry", null)
+                                            .create()
+                                            .show();
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
                 }
             }
         });
+
+        // create user
+        User registerUserData = new User(login, password);
     }
 
-    // Add params to url
+    // add params to url
     public static String urlParams(String url , HashMap<String, String> params ) {
         Character and = new Character('&');
         Character lastChar = new Character(url.charAt(url.length()-1));

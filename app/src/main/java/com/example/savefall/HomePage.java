@@ -19,6 +19,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +49,8 @@ public class HomePage extends AppCompatActivity {
     TextView xText, yText, zText, rootText, mTextViewResult, latTextView, lonTextView, appName, testOne, testTwo;
     double rootSquare;
 
+    Button logoutBtn;
+
     SensorManager sensorManager;
     Sensor sensor;
     boolean isPresent = false;
@@ -56,8 +60,12 @@ public class HomePage extends AppCompatActivity {
     int PERMISSION_ID = 44;
     FusedLocationProviderClient mFusedLocationClient;
 
+    // locat database
+    UserLocalStore userLocalStore;
+
     // for Http parameters
-    String url = "http://167.71.59.142/api/";
+    public static String appURL = "http://167.71.59.142";
+    String url = appURL+"/api/";
     HashMap<String, Float> params = new HashMap<String, Float>();
 
     @Override
@@ -68,13 +76,12 @@ public class HomePage extends AppCompatActivity {
 
         // Views
         mTextViewResult = (TextView) findViewById(R.id.response_http);
-        appName = (TextView) findViewById(R.id.textView);
         testOne = (TextView) findViewById(R.id.test_one);
         testTwo = (TextView) findViewById(R.id.test_two);
 
         // Lon & Lat of Location
-        latTextView = findViewById(R.id.latTextView);
-        lonTextView = findViewById(R.id.lonTextView);
+        latTextView = (TextView) findViewById(R.id.latTextView);
+        lonTextView = (TextView) findViewById(R.id.lonTextView);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -91,6 +98,32 @@ public class HomePage extends AppCompatActivity {
 
         // orientation
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        userLocalStore = new UserLocalStore(this);
+
+        // logout
+        logoutBtn = (Button) findViewById(R.id.logOutBtn);
+
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logOut();
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        appName = (TextView) findViewById(R.id.textView);
+
+        if(authentication() == true){
+            appName.setText("Authenticated");
+        }
+        else{
+            appName.setText("NOT Authenticated");
+        }
     }
 
     @Override
@@ -119,6 +152,20 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
+    // log out
+    private void logOut(){
+        userLocalStore.clearLoggedUserData();
+        userLocalStore.setUserLogged(false);
+
+        Intent welcomePage = new Intent(this, MainActivity.class);
+        startActivity(welcomePage);
+    }
+
+    // check authentication
+    private boolean authentication(){
+        return userLocalStore.getUserLogged();
+    }
+
     SensorEventListener sel = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent event) {
@@ -128,6 +175,7 @@ public class HomePage extends AppCompatActivity {
             yText = (TextView) findViewById(R.id.y);
             zText = (TextView) findViewById(R.id.z);
             rootText = (TextView) findViewById(R.id.rootSquare);
+            appName = (TextView) findViewById(R.id.textView);
 
             rootSquare = 0;
 
@@ -171,7 +219,8 @@ public class HomePage extends AppCompatActivity {
                     .url(url)
                     .build();
 
-            appName.setText(request.toString());
+//            appName.setText("");
+//            appName.setText(request.toString());
 
             client.newCall(request).enqueue(new Callback() {
                 @Override
@@ -182,7 +231,7 @@ public class HomePage extends AppCompatActivity {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if(response.isSuccessful()){
-                        final String myResponse = response.body().toString();
+                        final String myResponse = response.body().string();
 
                         HomePage.this.runOnUiThread(new Runnable() {
                             @Override

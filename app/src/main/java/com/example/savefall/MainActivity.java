@@ -6,10 +6,14 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     private Button homeButton, loginButton, registrationButton;
+
+    //local database
+    UserLocalStore userLocalStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,22 @@ public class MainActivity extends AppCompatActivity {
                 openLoginPage();
             }
         });
+
+        userLocalStore = new UserLocalStore(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if(authentication() == true){
+            openHomePage();
+        }
+    }
+
+    // check authentication
+    private boolean authentication(){
+        return userLocalStore.getUserLogged();
     }
 
     // Change page to activity_home_page
