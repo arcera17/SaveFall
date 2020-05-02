@@ -9,8 +9,13 @@
     <string name="to_home">Home page</string>
     <string name="login">Login</string>
     <string name="registration">Registration</string>
-    <string name="email">Email</string>
+    <string name="email">E-mail</string>
     <string name="password">Password</string>
     <string name="register">Register</string>
     <string name="logOut">Log Out</string>
+    <string name="name">Name</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="birthDate">Birth date</string>
+    <string name="dateInputDefault">dd/mm/yyyy</string>
+
 </resources>
