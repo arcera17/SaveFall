@@ -33,6 +33,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -47,8 +48,9 @@ import okhttp3.Response;
 public class HomePage extends AppCompatActivity {
 
     TextView xText, yText, zText, rootText, mTextViewResult, latTextView, lonTextView, appName, testOne, testTwo;
-    double rootSquare;
+    float rootSqr;
 
+    TextView testUserId, testUserPassword, testUserLogin, testUserName, testUserPrivacyPolicy, testUserBirthDate;
     Button logoutBtn;
 
     SensorManager sensorManager;
@@ -62,6 +64,7 @@ public class HomePage extends AppCompatActivity {
 
     // locat database
     UserLocalStore userLocalStore;
+    User loggedUser;
 
     // for Http parameters
     public static String appURL = "http://167.71.59.142";
@@ -74,6 +77,9 @@ public class HomePage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
 
+        appName = (TextView) findViewById(R.id.textView);
+        userLocalStore = new UserLocalStore(this);
+
         // Views
         mTextViewResult = (TextView) findViewById(R.id.response_http);
         testOne = (TextView) findViewById(R.id.test_one);
@@ -83,39 +89,60 @@ public class HomePage extends AppCompatActivity {
         latTextView = (TextView) findViewById(R.id.latTextView);
         lonTextView = (TextView) findViewById(R.id.lonTextView);
 
+
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         getLastLocation();
 
-        // Accelerometer sensor
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+        if(authentication() == true){
+            // Accelerometer sensor
+            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+            List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
 
-        if (sensors.size() > 0) {
-            isPresent = true;
-            sensor = sensors.get(0);
-        }
-
-        // orientation
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        userLocalStore = new UserLocalStore(this);
-
-        // logout
-        logoutBtn = (Button) findViewById(R.id.logOutBtn);
-
-        logoutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logOut();
+            if (sensors.size() > 0) {
+                isPresent = true;
+                sensor = sensors.get(0);
             }
-        });
+
+            // orientation
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+
+            // logout
+            logoutBtn = (Button) findViewById(R.id.logOutBtn);
+
+            logoutBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    logOut();
+                }
+            });
+
+            loggedUser = userLocalStore.getLoggedUser();
+
+            testUserId = (TextView) findViewById(R.id.testUserId);
+            testUserLogin = (TextView) findViewById(R.id.testUserLogin);
+            testUserPassword = (TextView) findViewById(R.id.testUserPassword);
+            testUserName = (TextView) findViewById(R.id.testUserName);
+            testUserPrivacyPolicy = (TextView) findViewById(R.id.testUserPrivacyPolicy);
+            testUserBirthDate = (TextView) findViewById(R.id.testUserBirthDate);
+
+//            testUserId.setText(loggedUser.id);
+            testUserLogin.setText(loggedUser.login);
+            testUserPassword.setText(loggedUser.password);
+            testUserName.setText(loggedUser.name);
+            testUserPrivacyPolicy.setText(loggedUser.privacyPolicy);
+            testUserBirthDate.setText(loggedUser.birthDate);
+        }
+        else{
+            appName.setText("NOT Authenticated");
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
         appName = (TextView) findViewById(R.id.textView);
 
         if(authentication() == true){
@@ -177,38 +204,38 @@ public class HomePage extends AppCompatActivity {
             rootText = (TextView) findViewById(R.id.rootSquare);
             appName = (TextView) findViewById(R.id.textView);
 
-            rootSquare = 0;
+            rootSqr = 0;
 
             if (x >= 0) {
                 xText.setText("x: " + x);
-                rootSquare += Math.pow(x, 2);
+                rootSqr += Math.pow(x, 2);
             } else {
                 xText.setText("x -");
             }
 
             if (y >= 0) {
                 yText.setText("y: " + y);
-                rootSquare += Math.pow(y, 2);
+                rootSqr += Math.pow(y, 2);
             } else {
                 yText.setText("y -");
             }
 
             if (z >= 0) {
                 zText.setText("z: " + z);
-                rootSquare += Math.pow(z, 2);
+                rootSqr += Math.pow(z, 2);
             } else {
                 zText.setText("z -");
             }
 
-            rootSquare = Math.sqrt(rootSquare);
-
-            rootTextString = "Root square :" + rootSquare;
+            rootSqr = (float) Math.sqrt(rootSqr);
+            rootTextString = "Root square :" + rootSqr;
             rootText.setText(rootTextString);
 
             // Paramds for url
             params.put("x", x);
             params.put("y", y);
             params.put("z", z);
+            params.put("rootSqr", rootSqr);
 
             // Add params to url
             url += urlParams(url, params);

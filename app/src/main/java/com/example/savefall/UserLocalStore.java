@@ -16,21 +16,27 @@ public class UserLocalStore {
     // write user date in local database on phone
     public void storeUserData(User user){
         SharedPreferences.Editor spEditor = userLocalDatabase.edit();
-//        spEditor.putString("name", user.name);
-//        spEditor.putInt("age", user.age);
+        spEditor.putInt("id", user.id);
         spEditor.putString("login", user.login);
         spEditor.putString("password", user.password);
+        spEditor.putString("name", user.name);
+        spEditor.putString("email", user.email);
+        spEditor.putString("privacyPolicy", user.privacyPolicy);
+        spEditor.putString("birthDate", user.birthDate);
+
         spEditor.commit();
     }
 
     // get logged user date from database
     public User getLoggedUser(){
-//        String name = userLocalDatabase.getString("name","");
-//        int age = userLocalDatabase.getInt("age", -1);
+        int id = userLocalDatabase.getInt("id", 0);
         String login = userLocalDatabase.getString("login","");
         String password = userLocalDatabase.getString("password","");
-
-        User loggedUser = new User( login, password);
+        String name = userLocalDatabase.getString("name","");
+        String email = userLocalDatabase.getString("email","");
+        String privacyPolicy = userLocalDatabase.getString("privacyPolicy", "");
+        String birthDate = userLocalDatabase.getString("birthDate", "");
+        User loggedUser = new User( id, login, password, name, email, privacyPolicy, birthDate);
 
         return loggedUser;
     }

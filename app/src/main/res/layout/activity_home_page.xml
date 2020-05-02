@@ -13,7 +13,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="40dp"
         android:layout_marginLeft="40dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:text="@string/on_x"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -24,7 +24,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="40dp"
         android:layout_marginLeft="40dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:text="@string/on_y"
         app:layout_constraintStart_toEndOf="@+id/x"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -35,7 +35,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="40dp"
         android:layout_marginLeft="40dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:text="@string/on_z"
         app:layout_constraintStart_toEndOf="@+id/y"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
@@ -134,4 +134,70 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/response_http" />
+
+    <TextView
+        android:id="@+id/testUserId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:text="Id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logOutBtn" />
+
+    <TextView
+        android:id="@+id/testUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:text="name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/testUserId" />
+
+    <TextView
+        android:id="@+id/testUserLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:text="login"
+        app:layout_constraintStart_toEndOf="@+id/testUserId"
+        app:layout_constraintTop_toBottomOf="@+id/logOutBtn" />
+
+    <TextView
+        android:id="@+id/testUserPassword"
+        android:layout_width="wrap_content"
+        android:layout_height="19dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:text="password"
+        app:layout_constraintStart_toEndOf="@+id/testUserLogin"
+        app:layout_constraintTop_toBottomOf="@+id/logOutBtn" />
+
+    <TextView
+        android:id="@+id/testUserPrivacyPolicy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:text="privacy_policy"
+        app:layout_constraintStart_toEndOf="@+id/testUserName"
+        app:layout_constraintTop_toBottomOf="@+id/testUserLogin" />
+
+    <TextView
+        android:id="@+id/testUserBirthDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"
+        android:text="bdate"
+        app:layout_constraintStart_toEndOf="@+id/testUserPrivacyPolicy"
+        app:layout_constraintTop_toBottomOf="@+id/testUserPassword" />
 </androidx.constraintlayout.widget.ConstraintLayout>

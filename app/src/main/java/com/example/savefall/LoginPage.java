@@ -26,7 +26,6 @@ public class LoginPage extends AppCompatActivity {
 
     private Button loginBtn;
     private EditText loginInput,  passwordInput;
-    private TextView requestTest,responseTest;
     UserLocalStore userLocalStore;
 
     @Override
@@ -54,8 +53,6 @@ public class LoginPage extends AppCompatActivity {
         // data from activity
         loginInput = (EditText) findViewById(R.id.loginInput);
         passwordInput = (EditText) findViewById(R.id.passwordInput);
-        requestTest = (TextView) findViewById(R.id.requestTest);
-        responseTest = (TextView) findViewById(R.id.responseTest);
 
         // get entered data
         String login = loginInput.getText().toString();
@@ -74,12 +71,14 @@ public class LoginPage extends AppCompatActivity {
                 .url(url)
                 .build();
 
-        requestTest.setText(request.toString());
-
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                responseTest.setText("Http: bad" + e.getMessage());
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginPage.this);
+                builder.setMessage("Http: bad" + e.getMessage())
+                        .setNegativeButton("Retry", null)
+                        .create()
+                        .show();
             }
 
             @Override
@@ -96,10 +95,15 @@ public class LoginPage extends AppCompatActivity {
 
                                 // if is success registration
                                 if(success){
-                                    String login = jsonResponse.getString("pass");
+                                    int userId = jsonResponse.getInt("id_user");
+                                    String login = jsonResponse.getString("login");
                                     String password = jsonResponse.getString("pass");
+                                    String name = jsonResponse.getString("name");
+                                    String email = jsonResponse.getString("email");
+                                    String privacyPolicy = jsonResponse.getString("privacy_policy");
+                                    String birthdate = jsonResponse.getString("birth_date");
 
-                                    User  user = new User(login, password);
+                                    User  user = new User(userId, login, password, name, email, privacyPolicy, birthdate);
 
                                     userLocalStore.storeUserData(user);
                                     userLocalStore.setUserLogged(true);
@@ -117,7 +121,6 @@ public class LoginPage extends AppCompatActivity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                            responseTest.setText("Response: "+myResponse);
                         }
                     });
                 }
