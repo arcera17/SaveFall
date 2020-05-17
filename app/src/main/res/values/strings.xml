@@ -17,5 +17,6 @@
     <string name="privacy_policy">Privacy Policy</string>
     <string name="birthDate">Birth date</string>
     <string name="dateInputDefault">dd/mm/yyyy</string>
+    <string name="backgroundOk">Click here to start background Service</string>
 
 </resources>

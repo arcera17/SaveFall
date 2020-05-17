@@ -1,21 +1,26 @@
 package com.example.savefall;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
@@ -31,6 +36,10 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -38,6 +47,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,7 +55,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class HomePage extends AppCompatActivity {
+public class HomePage extends AppCompatActivity  {
 
     TextView xText, yText, zText, rootText, mTextViewResult, latTextView, lonTextView, appName, testOne, testTwo;
     float rootSqr;
@@ -53,10 +63,16 @@ public class HomePage extends AppCompatActivity {
     TextView testUserId, testUserPassword, testUserLogin, testUserName, testUserPrivacyPolicy, testUserBirthDate;
     Button logoutBtn;
 
+    // Accelerometer
     SensorManager sensorManager;
     Sensor sensor;
     boolean isPresent = false;
     String rootTextString = "";
+    // Accelerometer graph
+    LineGraphSeries<DataPoint> valueOnX = new LineGraphSeries<DataPoint>();
+    LineGraphSeries<DataPoint> valueOnY = new LineGraphSeries<DataPoint>();
+    LineGraphSeries<DataPoint> valueOnZ = new LineGraphSeries<DataPoint>();
+    private int lastX = 0;
 
     // Location
     int PERMISSION_ID = 44;
@@ -65,14 +81,16 @@ public class HomePage extends AppCompatActivity {
     // locat database
     UserLocalStore userLocalStore;
     User loggedUser;
+    int loggedUserID = 0;
 
     // for Http parameters
     public static String appURL = "http://167.71.59.142";
-    String url = appURL+"/api/";
+    String url = appURL+"/api";
     HashMap<String, Float> params = new HashMap<String, Float>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
@@ -88,26 +106,52 @@ public class HomePage extends AppCompatActivity {
         // Lon & Lat of Location
         latTextView = (TextView) findViewById(R.id.latTextView);
         lonTextView = (TextView) findViewById(R.id.lonTextView);
-
-
-
+        testUserId = (TextView) findViewById(R.id.testUserId);
+        testUserLogin = (TextView) findViewById(R.id.testUserLogin);
+        testUserPassword = (TextView) findViewById(R.id.testUserPassword);
+        testUserName = (TextView) findViewById(R.id.testUserName);
+        testUserPrivacyPolicy = (TextView) findViewById(R.id.testUserPrivacyPolicy);
+        testUserBirthDate = (TextView) findViewById(R.id.testUserBirthDate);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Create graph view instance
+        GraphView graph = (GraphView) findViewById(R.id.graph);
 
         getLastLocation();
 
+        // orientation
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        // Accelerometer sensor
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
+
+        // Create graph and all those settings
+        valueOnX.setColor(Color.BLUE);
+        valueOnX.setTitle("axa-x");
+        graph.addSeries(valueOnX);
+        valueOnY.setColor(Color.GREEN);
+        valueOnY.setTitle("axa-y");
+        graph.addSeries(valueOnY);
+        valueOnZ.setColor(Color.RED);
+        valueOnZ.setTitle("axa-z");
+        graph.addSeries(valueOnZ);
+        Viewport viewport = graph.getViewport();
+        viewport.setYAxisBoundsManual(true);
+        viewport.setMinY(-40);
+        viewport.setMaxY(40);
+        viewport.setMaxX(150);
+        viewport.setScalable(true);
+        graph.getLegendRenderer().setVisible(true);
+        graph.getLegendRenderer().setTextSize(30);
+
+
+        if (sensors.size() > 0) {
+            isPresent = true;
+            sensor = sensors.get(0);
+        }
+
         if(authentication() == true){
-            // Accelerometer sensor
-            sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-            List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
-
-            if (sensors.size() > 0) {
-                isPresent = true;
-                sensor = sensors.get(0);
-            }
-
-            // orientation
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
 
             // logout
             logoutBtn = (Button) findViewById(R.id.logOutBtn);
@@ -121,19 +165,13 @@ public class HomePage extends AppCompatActivity {
 
             loggedUser = userLocalStore.getLoggedUser();
 
-            testUserId = (TextView) findViewById(R.id.testUserId);
-            testUserLogin = (TextView) findViewById(R.id.testUserLogin);
-            testUserPassword = (TextView) findViewById(R.id.testUserPassword);
-            testUserName = (TextView) findViewById(R.id.testUserName);
-            testUserPrivacyPolicy = (TextView) findViewById(R.id.testUserPrivacyPolicy);
-            testUserBirthDate = (TextView) findViewById(R.id.testUserBirthDate);
-
-//            testUserId.setText(loggedUser.id);
-            testUserLogin.setText(loggedUser.login);
-            testUserPassword.setText(loggedUser.password);
-            testUserName.setText(loggedUser.name);
-            testUserPrivacyPolicy.setText(loggedUser.privacyPolicy);
-            testUserBirthDate.setText(loggedUser.birthDate);
+            loggedUserID = loggedUser.id;
+            testUserId.setText("User Id: " + loggedUserID);
+            testUserLogin.setText("User login: "+loggedUser.login);
+            testUserPassword.setText("User password: "+loggedUser.password);
+            testUserName.setText("User name: "+loggedUser.name);
+            testUserPrivacyPolicy.setText("User P&R: "+loggedUser.privacyPolicy);
+            testUserBirthDate.setText("User BD: "+loggedUser.birthDate);
         }
         else{
             appName.setText("NOT Authenticated");
@@ -227,11 +265,18 @@ public class HomePage extends AppCompatActivity {
                 zText.setText("z -");
             }
 
+            // Update graph
+            valueOnX.appendData(new DataPoint(lastX, x),true,150);
+            valueOnY.appendData(new DataPoint(lastX, y),true,150);
+            valueOnZ.appendData(new DataPoint(lastX, z),true,150);
+            lastX++;
+
             rootSqr = (float) Math.sqrt(rootSqr);
             rootTextString = "Root square :" + rootSqr;
             rootText.setText(rootTextString);
 
             // Paramds for url
+            url += "?user_id=" +  loggedUser.id;
             params.put("x", x);
             params.put("y", y);
             params.put("z", z);
@@ -269,6 +314,7 @@ public class HomePage extends AppCompatActivity {
                     }
                 }
             });
+            
         }
 
         @Override
@@ -287,12 +333,7 @@ public class HomePage extends AppCompatActivity {
 
         Iterator<?> iter = params.entrySet().iterator();
         while (iter.hasNext()) {
-            if (sb.length() <= 0) {
-                sb.append('?');
-            }
-            else{
-                sb.append('&');
-            }
+            sb.append('&');
             Map.Entry<?, ?> entry = (Map.Entry<?, ?>) iter.next();
 
             sb.append(entry.getKey()).append("=").append(entry.getValue());

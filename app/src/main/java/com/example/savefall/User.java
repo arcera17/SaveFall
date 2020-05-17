@@ -5,8 +5,8 @@ public class User {
     int id;
 
     public User(int id, String login, String password, String name, String email,String privacyPolicy, String birthDate){
-        this.name = name;
         this.id = id;
+        this.name = name;
         this.login = login;
         this.password = password;
         this.email = email;
