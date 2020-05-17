@@ -40,13 +40,20 @@
         app:layout_constraintStart_toEndOf="@+id/y"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/graph"
+        android:layout_width="match_parent"
+        android:layout_height="200dip"
+        app:layout_constraintTop_toBottomOf="@+id/rootSquare"
+        tools:layout_editor_absoluteX="72dp" />
+
     <TextView
         android:id="@+id/rootSquare"
         android:layout_width="180dp"
         android:layout_height="0dp"
         android:layout_marginStart="32dp"
         android:layout_marginLeft="32dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/y" />
 
@@ -76,7 +83,7 @@
         android:layout_height="0dp"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:text="@string/http_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lonTextView" />
@@ -85,23 +92,23 @@
         android:id="@+id/latTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="44dp"
-        android:layout_marginLeft="44dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginLeft="80dp"
+        android:layout_marginTop="20dp"
         android:text="Latitude: "
         app:layout_constraintStart_toEndOf="@+id/lonTextView"
-        app:layout_constraintTop_toBottomOf="@+id/rootSquare" />
+        app:layout_constraintTop_toBottomOf="@+id/graph" />
 
     <TextView
         android:id="@+id/lonTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginLeft="48dp"
+        android:layout_marginTop="20dp"
         android:text="Longitude: "
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rootSquare" />
+        app:layout_constraintTop_toBottomOf="@+id/graph" />
 
     <TextView
         android:id="@+id/test_one"
@@ -109,7 +116,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="48dp"
         android:layout_marginLeft="48dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="30dp"
         android:text="test 2 "
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/response_http" />
@@ -120,7 +127,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="112dp"
         android:layout_marginLeft="112dp"
-        android:layout_marginTop="52dp"
+        android:layout_marginTop="30dp"
         android:text="test 2"
         app:layout_constraintStart_toEndOf="@+id/test_one"
         app:layout_constraintTop_toBottomOf="@+id/response_http" />
@@ -129,7 +136,7 @@
         android:id="@+id/logOutBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="148dp"
+        android:layout_marginTop="60dp"
         android:text="@string/logOut"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -150,12 +157,12 @@
         android:id="@+id/testUserName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="30dp"
         android:text="name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/testUserId" />
+        app:layout_constraintStart_toEndOf="@+id/testUserId"
+        app:layout_constraintTop_toBottomOf="@+id/logOutBtn" />
 
     <TextView
         android:id="@+id/testUserLogin"
@@ -163,21 +170,21 @@
         android:layout_height="19dp"
         android:layout_marginStart="30dp"
         android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="login"
-        app:layout_constraintStart_toEndOf="@+id/testUserId"
-        app:layout_constraintTop_toBottomOf="@+id/logOutBtn" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/testUserId" />
 
     <TextView
         android:id="@+id/testUserPassword"
         android:layout_width="wrap_content"
         android:layout_height="19dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="20dp"
         android:text="password"
         app:layout_constraintStart_toEndOf="@+id/testUserLogin"
-        app:layout_constraintTop_toBottomOf="@+id/logOutBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/testUserName" />
 
     <TextView
         android:id="@+id/testUserPrivacyPolicy"
@@ -185,19 +192,20 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
         android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="privacy_policy"
-        app:layout_constraintStart_toEndOf="@+id/testUserName"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/testUserLogin" />
 
     <TextView
         android:id="@+id/testUserBirthDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="20dp"
         android:text="bdate"
         app:layout_constraintStart_toEndOf="@+id/testUserPrivacyPolicy"
         app:layout_constraintTop_toBottomOf="@+id/testUserPassword" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
