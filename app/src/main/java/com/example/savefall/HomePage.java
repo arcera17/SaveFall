@@ -4,12 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.media.app.NotificationCompat;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -20,8 +22,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.view.View;
@@ -40,6 +44,9 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -88,9 +95,18 @@ public class HomePage extends AppCompatActivity  {
     String url = appURL+"/api";
     HashMap<String, Float> params = new HashMap<String, Float>();
 
+    String coordString = new String();
+    private final double minVal = 0.019135;
+
+    // Foreground
+    private static final int NOTIF_ID = 1;
+    private static final String NOTIF_CHANNEL_ID = "SaveFall_Id";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        // Start Background service
+        startService(new Intent(this, SaveFallService.class));
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
@@ -106,6 +122,7 @@ public class HomePage extends AppCompatActivity  {
         // Lon & Lat of Location
         latTextView = (TextView) findViewById(R.id.latTextView);
         lonTextView = (TextView) findViewById(R.id.lonTextView);
+        // Users stats info
         testUserId = (TextView) findViewById(R.id.testUserId);
         testUserLogin = (TextView) findViewById(R.id.testUserLogin);
         testUserPassword = (TextView) findViewById(R.id.testUserPassword);
@@ -117,7 +134,7 @@ public class HomePage extends AppCompatActivity  {
         // Create graph view instance
         GraphView graph = (GraphView) findViewById(R.id.graph);
 
-        getLastLocation();
+//        getLastLocation();
 
         // orientation
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -271,50 +288,96 @@ public class HomePage extends AppCompatActivity  {
             valueOnZ.appendData(new DataPoint(lastX, z),true,150);
             lastX++;
 
-            rootSqr = (float) Math.sqrt(rootSqr);
+            rootSqr = (float) (Math.sqrt(rootSqr) / 9.8);
             rootTextString = "Root square :" + rootSqr;
             rootText.setText(rootTextString);
 
-            // Paramds for url
-            url += "?user_id=" +  loggedUser.id;
-            params.put("x", x);
-            params.put("y", y);
-            params.put("z", z);
-            params.put("rootSqr", rootSqr);
+            if(rootSqr <= minVal){
 
-            // Add params to url
-            url += urlParams(url, params);
-
-            // Create client for Http request and to request URL
-            OkHttpClient client = new OkHttpClient();
-            Request request = new Request.Builder()
-                    .url(url)
-                    .build();
-
-//            appName.setText("");
-//            appName.setText(request.toString());
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    testOne.setText("Http: bad" + e.getMessage());
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if(response.isSuccessful()){
-                        final String myResponse = response.body().string();
-
-                        HomePage.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                testOne.setText("Response: "+myResponse);
-                            }
-                        });
+                AlertDialog.Builder builder = new AlertDialog.Builder(HomePage.this);
+                builder.setCancelable(true);
+                builder.setTitle(R.string.are_ok);
+                builder.setMessage(R.string.you_are_fine);
+                builder.setPositiveButton(R.string.confirm,
+                    new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
                     }
-                }
-            });
-            
+                });
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                final AlertDialog dialog = builder.create();
+                dialog.show();
+
+                // Hide after some seconds
+                final Handler handler  = new Handler();
+                final Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                    }
+                };
+
+                dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        handler.removeCallbacks(runnable);
+                    }
+                });
+
+                handler.postDelayed(runnable, 10000);
+
+
+                // Paramds for url
+                url += "?user_id=" +  loggedUser.id;
+                params.put("x", x);
+                params.put("y", y);
+                params.put("z", z);
+                params.put("rootSqr", rootSqr);
+
+                String jsonResponse = getLastLocationString();
+                testOne.setText("Response: "+jsonResponse);
+
+                // Sirena
+                MediaPlayer mediaPlayer= MediaPlayer.create(HomePage.this, R.raw.sirena);
+                mediaPlayer.start();
+
+                // Add params to url
+                url += urlParams(url, params);
+
+                // Create client for Http request and to request URL
+                OkHttpClient client = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        testOne.setText("Http: bad" + e.getMessage());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if(response.isSuccessful()){
+                            final String myResponse = response.body().string();
+
+                            HomePage.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    testOne.setText("Response: "+myResponse);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
         }
 
         @Override
@@ -369,6 +432,45 @@ public class HomePage extends AppCompatActivity  {
         } else {
             requestPermissions();
         }
+    }
+
+    // all for location
+    @SuppressLint("MissingPermission")
+    private String getLastLocationString(){
+        if (checkPermissions()) {
+            if (isLocationEnabled()) {
+                mFusedLocationClient.getLastLocation().addOnCompleteListener(
+                    new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                        Location location = task.getResult();
+                        if (location == null) {
+                            requestNewLocationData();
+                        } else {
+                            try {
+                                coordString =  new JSONObject()
+                                        .put("success", true)
+                                        .put("lat", location.getLatitude())
+                                        .put("lon", location.getLongitude())
+                                        .toString();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                try {
+                                    coordString =  new JSONObject()
+                                            .put("success", false)
+                                            .toString();
+                                } catch (JSONException ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
+                            ;
+                        }
+                        }
+                    }
+                );
+            }
+        }
+        return coordString;
     }
 
     @SuppressLint("MissingPermission")
